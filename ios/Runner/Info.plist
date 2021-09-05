@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
 	<!-- MapData -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to location when open.</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Your location is required for this app</string>
     <key>io.flutter.embedded_views_preview</key>
     <string>YES</string>
 

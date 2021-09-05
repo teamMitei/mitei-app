@@ -2,6 +2,7 @@
     package="com.example.location_3">
     <!--MapData-->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!--android.permission.ACCESS_BACKGROUND_LOCATION-->
    <application
         android:label="location_3"
         android:icon="@mipmap/ic_launcher">
