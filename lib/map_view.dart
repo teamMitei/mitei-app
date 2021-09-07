@@ -9,6 +9,8 @@ import 'package:location_3/stamp/stamp_01.dart';
 import 'package:location_3/stamp/stamp_02.dart';
 import 'package:location_3/stamp/stamp_03.dart';
 
+bool testFlag = false;
+
 class TabInfo {
   String label;
   Widget widget;
@@ -119,151 +121,51 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                       icon: Icon(Icons.add_location_alt_rounded),
                       onPressed: () {
                         showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: Text(
-                                  '口コミ',
-                                  textAlign: TextAlign.center,
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text(
+                                '口コミ',
+                                textAlign: TextAlign.center,
+                              ),
+                              content: setupAlertDialoadContainer(),
+                              actions: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Center(
+                                      child: ElevatedButton(
+                                        child: const Text('ok'),
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.orange,
+                                          onPrimary: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                        },
+                                      ),
+                                    ),
+                                    Center(
+                                      child: ElevatedButton(
+                                        child: const Text('cancel'),
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.orange,
+                                          onPrimary: Colors.white,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                content: setupAlertDialoadContainer(),
-                                actions: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Center(
-                                        child: ElevatedButton(
-                                          child: const Text('write'),
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Colors.orange,
-                                            onPrimary: Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            // ここにボタンを押した時に呼ばれるコードを書く
-                                            showDialog(
-                                              context: context,
-                                              barrierDismissible: false,
-                                              builder: (_) {
-                                                return AlertDialog(
-                                                  //title: Text("スタンプ"),
-                                                  content: DefaultTabController(
-                                                    length: _tabs.length,
-                                                    child: Container(
-                                                      height:
-                                                          deviceHeight * 0.5,
-                                                      child: Scaffold(
-                                                        appBar: new AppBar(
-                                                          title:
-                                                              Text('スタンプを選択'),
-                                                          backgroundColor:
-                                                              HexColor(
-                                                                  '#f5deb3'),
-                                                          bottom: PreferredSize(
-                                                            child: new TabBar(
-                                                              controller:
-                                                                  _tabController,
-                                                              isScrollable:
-                                                                  true,
-                                                              tabs: _tabs.map(
-                                                                  (TabInfo
-                                                                      tab) {
-                                                                return Tab(
-                                                                    text: tab
-                                                                        .label);
-                                                              }).toList(),
-                                                            ),
-                                                            preferredSize:
-                                                                Size.fromHeight(
-                                                                    30.0),
-                                                          ),
-                                                          automaticallyImplyLeading:
-                                                              false,
-                                                        ),
-                                                        body: TabBarView(
-                                                            controller:
-                                                                _tabController,
-                                                            children: _tabs
-                                                                .map((tab) =>
-                                                                    tab.widget)
-                                                                .toList()),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        Center(
-                                                          child: ElevatedButton
-                                                              .icon(
-                                                            icon: const Icon(
-                                                              Icons.tag_faces,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            label: const Text(
-                                                                'ok'),
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              primary:
-                                                                  Colors.green,
-                                                              onPrimary:
-                                                                  Colors.white,
-                                                            ),
-                                                            onPressed: () {},
-                                                          ),
-                                                        ),
-                                                        Center(
-                                                          child: ElevatedButton(
-                                                            child: const Text(
-                                                                'cancel'),
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              primary:
-                                                                  Colors.orange,
-                                                              onPrimary:
-                                                                  Colors.white,
-                                                            ),
-                                                            onPressed: () {
-                                                              // ここにボタンを押した時に呼ばれるコードを書く
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      Center(
-                                        child: ElevatedButton(
-                                          child: const Text('cancel'),
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Colors.orange,
-                                            onPrimary: Colors.white,
-                                          ),
-                                          onPressed: () {
-                                            // ここにボタンを押した時に呼ばれるコードを書く
-                                            Navigator.pop(context);
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            });
+                              ],
+                            );
+                          }
+                        );
                       },
                     ),
                   ),
@@ -421,6 +323,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
 }
 
 class _MapView extends HookWidget {
+  
   final Completer<GoogleMapController> _mapController = Completer();
   // 初期表示位置を渋谷駅に設定
   final Position _initialPosition = Position(
@@ -485,6 +388,7 @@ class _MapView extends HookWidget {
           //追記----------------------------------------------------------------------
           onTap: () {
             print('tap');
+            testFlag = true;
           }
           //--------------------------------------------------------------------------
           );
