@@ -305,6 +305,7 @@ class _MyHomePageState extends State<MyHomePage>
                                     child: IconButton(
                                       icon: Icon(
                                         Icons.close_rounded,
+                                        color: Colors.white,
                                       ),
                                       onPressed: () {
                                         Navigator.pop(context);
