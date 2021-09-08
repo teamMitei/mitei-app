@@ -67,8 +67,6 @@ class _MyMap extends HookWidget {
     speedAccuracy: 0,
   );
 
-  List<Marker> myMarker = [];
-
   @override
   Widget build(BuildContext context) {
     // 初期表示座標のMarkerを設定
@@ -89,7 +87,7 @@ class _MyMap extends HookWidget {
       body: GoogleMap(
         // マップとマーカー表示
         onMapCreated: _mapController.complete,
-        markers: Set.from(myMarker),
+        markers: markers.value.values.toSet(),
         // 初期位置
         initialCameraPosition: CameraPosition(
           target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
@@ -145,16 +143,6 @@ class _MyMap extends HookWidget {
   }
 
   Future<void> getLocation() async {
-    final cPosition = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    print(LatLng(cPosition.latitude, cPosition.longitude));
-    print(data);
-    data.add(Item(cPosition.latitude, cPosition.longitude));
-    myMarker = [];
-    myMarker.add(Marker(
-      markerId: MarkerId(cPosition.timestamp.toString()),
-      position: LatLng(cPosition.latitude, cPosition.longitude),
-    ));
+    flag = 1;
   }
 }
