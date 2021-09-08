@@ -81,7 +81,7 @@ class _MyMap extends State<MyMap> {
         // マップとマーカー表示
         onMapCreated: _mapController.complete,
         markers: Set.from(_myMarker),
-        onTap: _hand,
+        //onTap: _hand,
         // 初期位置
         initialCameraPosition: CameraPosition(
           target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
@@ -104,19 +104,21 @@ class _MyMap extends State<MyMap> {
     print(LatLng(cPosition.latitude, cPosition.longitude));
     print(data);
     data.add(Item(cPosition.latitude, cPosition.longitude));
-    //myMarker = [];
-    _myMarker.add(Marker(
-      markerId: MarkerId(cPosition.toString()),
-      position: LatLng(cPosition.latitude, cPosition.longitude),
-    ));
+    setState(() {
+      //myMarker = [];
+      _myMarker.add(Marker(
+        markerId: MarkerId(cPosition.toString()),
+        position: LatLng(cPosition.latitude, cPosition.longitude),
+      ));
+    });
   }
 
-  _hand(LatLng tapPoint) {
+  /*_hand(LatLng tapPoint) {
     setState(() {
       _myMarker.add(Marker(
         markerId: MarkerId(tapPoint.toString()),
         position: tapPoint,
       ));
     });
-  }
+  }*/
 }
