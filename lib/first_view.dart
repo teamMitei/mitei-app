@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:location_3/map_view.dart';
-import 'package:location_3/next_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:volume_control/volume_control.dart';
 

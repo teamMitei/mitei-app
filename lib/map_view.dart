@@ -9,6 +9,11 @@ import 'package:location_3/stamp/stamp_01.dart';
 import 'package:location_3/stamp/stamp_02.dart';
 import 'package:location_3/stamp/stamp_03.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:volume_control/volume_control.dart';
+import 'dart:io';
+
 class TabInfo {
   String label;
   Widget widget;
@@ -22,6 +27,13 @@ class MainPage extends StatefulWidget {
 
 //tab------------
 class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
+  var _status = 'Ready';
+
+  bool _isEnabled = true;
+  late Timer _timer;
+
+  double _val = 50;
+
   final List<TabInfo> _tabs = [
     TabInfo(
       '画像1',
@@ -101,17 +113,6 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Container(
-              child: Center(
-                child: IconButton(
-                  icon: Icon(Icons.home_rounded),
-                  onPressed: () {
-                    // ここにボタンを押した時に呼ばれるコードを書く
-                    Navigator.pop(context);
-                  },
-                ),
-              ),
-            ),
-            Container(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
@@ -143,107 +144,6 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                           ),
                                           onPressed: () {
                                             // ここにボタンを押した時に呼ばれるコードを書く
-                                            showDialog(
-                                              context: context,
-                                              barrierDismissible: false,
-                                              builder: (_) {
-                                                return AlertDialog(
-                                                  //title: Text("スタンプ"),
-                                                  content: DefaultTabController(
-                                                    length: _tabs.length,
-                                                    child: Container(
-                                                      height:
-                                                          deviceHeight * 0.5,
-                                                      child: Scaffold(
-                                                        appBar: new AppBar(
-                                                          title:
-                                                              Text('スタンプを選択'),
-                                                          backgroundColor:
-                                                              HexColor(
-                                                                  '#f5deb3'),
-                                                          bottom: PreferredSize(
-                                                            child: new TabBar(
-                                                              controller:
-                                                                  _tabController,
-                                                              isScrollable:
-                                                                  true,
-                                                              tabs: _tabs.map(
-                                                                  (TabInfo
-                                                                      tab) {
-                                                                return Tab(
-                                                                    text: tab
-                                                                        .label);
-                                                              }).toList(),
-                                                            ),
-                                                            preferredSize:
-                                                                Size.fromHeight(
-                                                                    30.0),
-                                                          ),
-                                                          automaticallyImplyLeading:
-                                                              false,
-                                                        ),
-                                                        body: TabBarView(
-                                                            controller:
-                                                                _tabController,
-                                                            children: _tabs
-                                                                .map((tab) =>
-                                                                    tab.widget)
-                                                                .toList()),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        Center(
-                                                          child: ElevatedButton
-                                                              .icon(
-                                                            icon: const Icon(
-                                                              Icons.tag_faces,
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            label: const Text(
-                                                                'ok'),
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              primary:
-                                                                  Colors.green,
-                                                              onPrimary:
-                                                                  Colors.white,
-                                                            ),
-                                                            onPressed: () {},
-                                                          ),
-                                                        ),
-                                                        Center(
-                                                          child: ElevatedButton(
-                                                            child: const Text(
-                                                                'cancel'),
-                                                            style:
-                                                                ElevatedButton
-                                                                    .styleFrom(
-                                                              primary:
-                                                                  Colors.orange,
-                                                              onPrimary:
-                                                                  Colors.white,
-                                                            ),
-                                                            onPressed: () {
-                                                              // ここにボタンを押した時に呼ばれるコードを書く
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                );
-                                              },
-                                            );
                                           },
                                         ),
                                       ),
@@ -274,7 +174,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
             Container(
               child: Center(
                 child: IconButton(
-                  icon: Icon(Icons.edit),
+                  icon: Icon(Icons.call),
                   onPressed: () {
                     // ここにボタンを押した時に呼ばれるコードを書く
                     showDialog(
@@ -282,38 +182,31 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                       barrierDismissible: false,
                       builder: (_) {
                         return AlertDialog(
-                          title: Text('コメント'),
-                          content: TextField(
-                            maxLines: 4,
-                            controller: myController,
-                            autofocus: true,
-                            decoration: InputDecoration(
-                              hintText: 'ここに入力',
-                              fillColor: Colors.grey[200],
-                              filled: true,
-                            ),
+                          title: Text(
+                            "110番通報する",
+                            textAlign: TextAlign.center,
                           ),
-                          actions: <Widget>[
+                          actions: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                Center(
-                                  child: ElevatedButton.icon(
-                                    icon: const Icon(
-                                      Icons.tag_faces,
-                                      color: Colors.white,
-                                    ),
-                                    label: const Text('ok'),
+                                Container(
+                                  child: ElevatedButton(
+                                    child: Text('call'),
                                     style: ElevatedButton.styleFrom(
-                                      primary: Colors.green,
+                                      primary: Colors.orange,
                                       onPrimary: Colors.white,
                                     ),
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      // ここにボタンを押した時に呼ばれるコードを書く
+                                      var url = 'https://flutter.keicode.com/';
+                                      _launchUrl('$url');
+                                    },
                                   ),
                                 ),
-                                Center(
+                                Container(
                                   child: ElevatedButton(
-                                    child: const Text('cancel'),
+                                    child: Text('cancel'),
                                     style: ElevatedButton.styleFrom(
                                       primary: Colors.orange,
                                       onPrimary: Colors.white,
@@ -321,8 +214,127 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                     onPressed: () {
                                       // ここにボタンを押した時に呼ばれるコードを書く
                                       Navigator.pop(context);
-                                      myController.text = '';
                                     },
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        );
+                      },
+                    );
+                    // var tel = '+12345678901';
+                    // _launchUrl('tel:$tel');
+                  },
+                ),
+              ),
+            ),
+            Container(
+              child: Center(
+                child: IconButton(
+                  icon: Icon(Icons.campaign),
+                  onPressed: () => {
+                    showDialog(
+                      barrierDismissible: false,
+                      context: context,
+                      builder: (_) {
+                        return AlertDialog(
+                          backgroundColor: Colors.transparent,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0))),
+                          actions: <Widget>[
+                            // ボタン領域
+                            Column(
+                              children: <Widget>[
+                                Container(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Container(
+                                        child: SizedBox(
+                                          height: deviceHeight * 0.3,
+                                          width: deviceHeight * 0.3,
+                                          child: ElevatedButton(
+                                            child: FittedBox(
+                                              fit: BoxFit.fitWidth,
+                                              child: Text(
+                                                "Tap",
+                                                style: TextStyle(fontSize: 32),
+                                              ),
+                                            ),
+                                            style: ElevatedButton.styleFrom(
+                                              primary: Colors
+                                                  .red, // HexColorで指定 //ボタンの背景色
+                                              onPrimary: Colors.black,
+                                              shape: const CircleBorder(
+                                                side: BorderSide(
+                                                  color: Colors.black,
+                                                  width: 1,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              if (_isEnabled) {
+                                                _isEnabled = false;
+                                                FlutterRingtonePlayer.play(
+                                                  android: AndroidSounds
+                                                      .notification, // Android用のサウンド
+                                                  ios: const IosSound(
+                                                      1014), // iOS用のサウンド
+                                                );
+                                                if (Platform.isIOS) {
+                                                  _timer = Timer.periodic(
+                                                    Duration(seconds: 2),
+                                                    (Timer timer) => {
+                                                      FlutterRingtonePlayer
+                                                          .play(
+                                                        android: AndroidSounds
+                                                            .notification, // Android用のサウンド
+                                                        ios: const IosSound(
+                                                            1014), // iOS用のサウンド
+                                                      ),
+                                                      () {
+                                                        VolumeControl.setVolume(
+                                                            _val);
+                                                      }
+                                                    },
+                                                  );
+                                                }
+                                              } else {
+                                                _isEnabled = true;
+                                                if (Platform.isAndroid) {
+                                                  FlutterRingtonePlayer.stop();
+                                                } else if (Platform.isIOS) {
+                                                  if (_timer != null &&
+                                                      _timer.isActive)
+                                                    _timer.cancel();
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  child: Center(
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.close_rounded,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        if (Platform.isAndroid) {
+                                          FlutterRingtonePlayer.stop();
+                                        } else if (Platform.isIOS) {
+                                          if (_timer != null && _timer.isActive)
+                                            _timer.cancel();
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
@@ -330,7 +342,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                           ],
                         );
                       },
-                    );
+                    )
                   },
                 ),
               ),
@@ -382,7 +394,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                         Navigator.pop(context);
                                         myController.text = '';
                                         setState(() {
-                                            _imageText = 'images/tiny02.jpg';
+                                          _imageText = 'images/tiny02.jpg';
                                         });
                                       },
                                     ),
@@ -397,7 +409,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                       ),
                                       onPressed: () {
                                         setState(() {
-                                            _imageText = 'images/tiny02.jpg';
+                                          _imageText = 'images/tiny02.jpg';
                                         });
                                       },
                                     ),
@@ -424,8 +436,8 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                 children: <Widget>[
                                   Container(
                                     child: SizedBox(
-                                      height: deviceHeight * 0.12,
-                                      width: deviceHeight * 0.12,
+                                      height: deviceHeight * 0.1,
+                                      width: deviceHeight * 0.1,
                                       child: IconButton(
                                         icon: Image.asset(
                                           'images/tiny02.jpg',
@@ -443,8 +455,8 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                   ),
                                   Container(
                                     child: SizedBox(
-                                      height: deviceHeight * 0.12,
-                                      width: deviceHeight * 0.12,
+                                      height: deviceHeight * 0.1,
+                                      width: deviceHeight * 0.1,
                                       child: IconButton(
                                         icon: Image.asset(
                                           'images/tiny03.jpg',
@@ -462,8 +474,8 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                   ),
                                   Container(
                                     child: SizedBox(
-                                      height: deviceHeight * 0.12,
-                                      width: deviceHeight * 0.12,
+                                      height: deviceHeight * 0.1,
+                                      width: deviceHeight * 0.1,
                                       child: IconButton(
                                         icon: Image.asset(
                                           'images/tiny04.jpg',
@@ -481,8 +493,8 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                                   ),
                                   Container(
                                     child: SizedBox(
-                                      height: deviceHeight * 0.12,
-                                      width: deviceHeight * 0.12,
+                                      height: deviceHeight * 0.1,
+                                      width: deviceHeight * 0.1,
                                       child: IconButton(
                                         icon: Image.asset(
                                           'images/tiny02.jpg',
@@ -500,12 +512,12 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
                             ),
                             Container(
                               child: Center(
-                                  child: Image.asset(
-                                    '$_imageText',
-                                    width: deviceHeight * 0.15,
-                                    height: deviceHeight * 0.15,
-                                  ),
-                                  ),
+                                child: Image.asset(
+                                  '$_imageText',
+                                  width: deviceHeight * 0.15,
+                                  height: deviceHeight * 0.15,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -519,6 +531,16 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      setState(() {
+        _status = 'Unable to launch url $url';
+      });
+    }
   }
 }
 
@@ -619,6 +641,8 @@ class HexColor extends Color {
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
+
+
 
 
 
