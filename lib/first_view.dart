@@ -308,6 +308,7 @@ class _MyHomePageState extends State<MyHomePage>
                                       ),
                                       onPressed: () {
                                         Navigator.pop(context);
+                                        _isEnabled = true;
                                         if (Platform.isAndroid) {
                                           FlutterRingtonePlayer.stop();
                                         } else if (Platform.isIOS) {
@@ -521,7 +522,6 @@ class _MyHomePageState extends State<MyHomePage>
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // ここにボタンを押した時に呼ばれるコードを書く
-          
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
