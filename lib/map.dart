@@ -37,14 +37,19 @@ class MyApp extends StatelessWidget {
       routes: <String, WidgetBuilder>{
         //Const.routeFirstView: (BuildContext context) => MapView(),
       },
-      home: _MyMap(),
+      home: MyMap(),
     );
   }
 }
 
-int flag = 0;
+class MyMap extends StatefulWidget {
+  MyMap({Key? key, this.title}) : super(key: key);
+  final String? title;
+  @override
+  _MyMap createState() => _MyMap();
+}
 
-class _MyMap extends HookWidget {
+class _MyMap extends State<MyMap> {
   /* Latitude & Longitude */
 
   /*Future<void> _goToTheLake() async {
@@ -52,6 +57,7 @@ class _MyMap extends HookWidget {
     controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }*/
 
+  final List _myMarker = [];
   /* Google Map */
   final Completer<GoogleMapController> _mapController = Completer();
   // 初期表示位置を渋谷駅に設定
@@ -67,29 +73,15 @@ class _MyMap extends HookWidget {
     speedAccuracy: 0,
   );
 
-  List<Marker> myMarker = [];
-
   @override
   Widget build(BuildContext context) {
-    // 初期表示座標のMarkerを設定
-    final initialMarkers = {
-      _initialPosition.timestamp.toString(): Marker(
-        markerId: MarkerId(_initialPosition.timestamp.toString()),
-        position: LatLng(_initialPosition.latitude, _initialPosition.longitude),
-      ),
-    };
-    final position = useState<Position>(_initialPosition);
-    final markers = useState<Map<String, Marker>>(initialMarkers);
-
-    _setCurrentLocation(position, markers);
-    _animateCamera(position);
-
     return Scaffold(
       appBar: AppBar(title: const Text('useState example')),
       body: GoogleMap(
         // マップとマーカー表示
         onMapCreated: _mapController.complete,
-        markers: Set.from(myMarker),
+        markers: Set.from(_myMarker),
+        onTap: _hand,
         // 初期位置
         initialCameraPosition: CameraPosition(
           target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
@@ -97,64 +89,34 @@ class _MyMap extends HookWidget {
         ),
         // 地図タイプ
         mapType: MapType.normal,
-        myLocationButtonEnabled: false,
         // 現在地マーク
         myLocationEnabled: true,
       ),
-      floatingActionButton:
-          FloatingActionButton(onPressed: getLocation, child: Icon(Icons.star)),
+      floatingActionButton: FloatingActionButton(
+          onPressed: _getLocation, child: Icon(Icons.star)),
     );
   }
 
-  Future<void> _setCurrentLocation(ValueNotifier<Position> position,
-      ValueNotifier<Map<String, Marker>> markers) async {
-    final currentPosition = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
-    const decimalPoint = 3;
-    // 過去の座標と最新の座標の小数点第三位で切り捨てた値を判定
-    if ((position.value.latitude).toStringAsFixed(decimalPoint) !=
-            (currentPosition.latitude).toStringAsFixed(decimalPoint) &&
-        (position.value.longitude).toStringAsFixed(decimalPoint) !=
-            (currentPosition.longitude).toStringAsFixed(decimalPoint)) {
-      // 現在地座標のstateを更新する
-      position.value = currentPosition;
-      if (flag == 1) {
-        data.add(Item(currentPosition.latitude, currentPosition.longitude));
-        // 現在地座標にMarkerを立てる
-        final marker = Marker(
-          markerId: MarkerId(currentPosition.timestamp.toString()),
-          position: LatLng(currentPosition.latitude, currentPosition.longitude),
-        );
-        markers.value.clear();
-        markers.value[currentPosition.timestamp.toString()] = marker;
-        flag = 0;
-      }
-    }
-  }
-
-  Future<void> _animateCamera(ValueNotifier<Position> position) async {
-    final mapController = await _mapController.future;
-    // 現在地座標が取得できたらカメラを現在地に移動する
-    await mapController.animateCamera(
-      CameraUpdate.newLatLng(
-        LatLng(position.value.latitude, position.value.longitude),
-      ),
-    );
-  }
-
-  Future<void> getLocation() async {
+  _getLocation() async {
     final cPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
     print(LatLng(cPosition.latitude, cPosition.longitude));
     print(data);
     data.add(Item(cPosition.latitude, cPosition.longitude));
-    myMarker = [];
-    myMarker.add(Marker(
-      markerId: MarkerId(cPosition.timestamp.toString()),
+    //myMarker = [];
+    _myMarker.add(Marker(
+      markerId: MarkerId(cPosition.toString()),
       position: LatLng(cPosition.latitude, cPosition.longitude),
     ));
+  }
+
+  _hand(LatLng tapPoint) {
+    setState(() {
+      _myMarker.add(Marker(
+        markerId: MarkerId(tapPoint.toString()),
+        position: tapPoint,
+      ));
+    });
   }
 }
