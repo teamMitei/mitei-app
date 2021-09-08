@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           Icon(Icons.share),
         ],
       ),
+
       persistentFooterButtons: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,

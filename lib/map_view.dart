@@ -53,6 +53,7 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
   }
 
   final myController = TextEditingController();
+  String _imageText = 'images/tiny02.jpg';
 
   @override
   Widget build(BuildContext context) {
@@ -341,77 +342,178 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // ここにボタンを押した時に呼ばれるコードを書く
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) {
-              return AlertDialog(
-                //title: Text("スタンプ"),
-                content: DefaultTabController(
-                  length: _tabs.length,
-                  child: Container(
-                    height: deviceHeight * 0.5,
-                    child: Scaffold(
-                      appBar: new AppBar(
-                        title: Text('スタンプを選択'),
-                        backgroundColor: HexColor('#f5deb3'),
-                        bottom: PreferredSize(
-                          child: new TabBar(
-                            controller: _tabController,
-                            isScrollable: true,
-                            tabs: _tabs.map((TabInfo tab) {
-                              return Tab(text: tab.label);
-                            }).toList(),
-                          ),
-                          preferredSize: Size.fromHeight(30.0),
-                        ),
-                        automaticallyImplyLeading: false,
+          showModalBottomSheet(
+              //モーダルの背景の色、透過
+              backgroundColor: Colors.transparent,
+              //ドラッグ可能にする（高さもハーフサイズからフルサイズになる様子）
+              isScrollControlled: true,
+              context: context,
+              builder: (BuildContext context) {
+                return StatefulBuilder(builder: (BuildContext context,
+                    StateSetter setState /*You can rename this!*/) {
+                  return Container(
+                    margin: EdgeInsets.only(top: 64),
+                    decoration: BoxDecoration(
+                      //モーダル自体の色
+                      color: Colors.white,
+                      //角丸にする
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20),
+                        topRight: Radius.circular(20),
                       ),
-                      body: TabBarView(
-                          controller: _tabController,
-                          children: _tabs.map((tab) => tab.widget).toList()),
                     ),
-                  ),
-                ),
-                actions: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Center(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(
-                            Icons.tag_faces,
-                            color: Colors.white,
-                          ),
-                          label: const Text('ok'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.green,
-                            onPrimary: Colors.white,
-                          ),
-                          onPressed: () {
-                            //print(_tabController.index);
-                          },
+                    child: Column(
+                      children: <Widget>[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(
+                                    child: TextButton(
+                                      child: const Text('キャンセル'),
+                                      style: TextButton.styleFrom(
+                                        primary: Colors.black,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        myController.text = '';
+                                        setState(() {
+                                            _imageText = 'images/tiny02.jpg';
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    child: ElevatedButton(
+                                      child: const Text('投稿'),
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.blue,
+                                        onPrimary: Colors.black,
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                            _imageText = 'images/tiny02.jpg';
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              child: TextField(
+                                maxLines: 4,
+                                controller: myController,
+                                autofocus: true,
+                                decoration: InputDecoration(
+                                  hintText: 'コメントを入力',
+                                  fillColor: Colors.grey[200],
+                                  filled: true,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Container(
+                                    child: SizedBox(
+                                      height: deviceHeight * 0.12,
+                                      width: deviceHeight * 0.12,
+                                      child: IconButton(
+                                        icon: Image.asset(
+                                          'images/tiny02.jpg',
+                                          width: deviceHeight * 0.6,
+                                          height: deviceHeight * 0.6,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                          setState(() {
+                                            _imageText = 'images/tiny02.jpg';
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    child: SizedBox(
+                                      height: deviceHeight * 0.12,
+                                      width: deviceHeight * 0.12,
+                                      child: IconButton(
+                                        icon: Image.asset(
+                                          'images/tiny03.jpg',
+                                          width: deviceHeight * 0.6,
+                                          height: deviceHeight * 0.6,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                          setState(() {
+                                            _imageText = 'images/tiny03.jpg';
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    child: SizedBox(
+                                      height: deviceHeight * 0.12,
+                                      width: deviceHeight * 0.12,
+                                      child: IconButton(
+                                        icon: Image.asset(
+                                          'images/tiny04.jpg',
+                                          width: deviceHeight * 0.6,
+                                          height: deviceHeight * 0.6,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                          setState(() {
+                                            _imageText = 'images/tiny04.jpg';
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    child: SizedBox(
+                                      height: deviceHeight * 0.12,
+                                      width: deviceHeight * 0.12,
+                                      child: IconButton(
+                                        icon: Image.asset(
+                                          'images/tiny02.jpg',
+                                          width: deviceHeight * 0.6,
+                                          height: deviceHeight * 0.6,
+                                        ),
+                                        onPressed: () {
+                                          // ここにボタンを押した時に呼ばれるコードを書く
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              child: Center(
+                                  child: Image.asset(
+                                    '$_imageText',
+                                    width: deviceHeight * 0.15,
+                                    height: deviceHeight * 0.15,
+                                  ),
+                                  ),
+                            ),
+                          ],
                         ),
-                      ),
-                      Center(
-                        child: ElevatedButton(
-                          child: const Text('cancel'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.orange,
-                            onPrimary: Colors.white,
-                          ),
-                          onPressed: () {
-                            // ここにボタンを押した時に呼ばれるコードを書く
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
-            },
-          );
+                      ],
+                    ),
+                  );
+                });
+              });
         },
         tooltip: 'Increment',
         child: Icon(Icons.add),
@@ -629,3 +731,81 @@ class HexColor extends Color {
                     //     );
                     //   },
                     // );
+
+
+
+
+
+
+
+          //                     showDialog(
+          //   context: context,
+          //   barrierDismissible: false,
+          //   builder: (_) {
+          //     return AlertDialog(
+          //       //title: Text("スタンプ"),
+          //       content: DefaultTabController(
+          //         length: _tabs.length,
+          //         child: Container(
+          //           height: deviceHeight * 0.5,
+          //           child: Scaffold(
+          //             appBar: new AppBar(
+          //               title: Text('スタンプを選択'),
+          //               backgroundColor: HexColor('#f5deb3'),
+          //               bottom: PreferredSize(
+          //                 child: new TabBar(
+          //                   controller: _tabController,
+          //                   isScrollable: true,
+          //                   tabs: _tabs.map((TabInfo tab) {
+          //                     return Tab(text: tab.label);
+          //                   }).toList(),
+          //                 ),
+          //                 preferredSize: Size.fromHeight(30.0),
+          //               ),
+          //               automaticallyImplyLeading: false,
+          //             ),
+          //             body: TabBarView(
+          //                 controller: _tabController,
+          //                 children: _tabs.map((tab) => tab.widget).toList()),
+          //           ),
+          //         ),
+          //       ),
+          //       actions: <Widget>[
+          //         Row(
+          //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //           children: [
+          //             Center(
+          //               child: ElevatedButton.icon(
+          //                 icon: const Icon(
+          //                   Icons.tag_faces,
+          //                   color: Colors.white,
+          //                 ),
+          //                 label: const Text('ok'),
+          //                 style: ElevatedButton.styleFrom(
+          //                   primary: Colors.green,
+          //                   onPrimary: Colors.white,
+          //                 ),
+          //                 onPressed: () {
+          //                   //print(_tabController.index);
+          //                 },
+          //               ),
+          //             ),
+          //             Center(
+          //               child: ElevatedButton(
+          //                 child: const Text('cancel'),
+          //                 style: ElevatedButton.styleFrom(
+          //                   primary: Colors.orange,
+          //                   onPrimary: Colors.white,
+          //                 ),
+          //                 onPressed: () {
+          //                   // ここにボタンを押した時に呼ばれるコードを書く
+          //                   Navigator.pop(context);
+          //                 },
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ],
+          //     );
+          //   },
+          // );
