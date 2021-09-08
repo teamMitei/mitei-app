@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
-import 'first_view.dart';
+// file
+import 'package:location_3/map.dart';
 
-void main() => runApp(FirstView());
+void main() {
+  runApp(MyApp());
+}

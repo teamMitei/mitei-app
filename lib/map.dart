@@ -6,7 +6,41 @@ import 'package:geolocator/geolocator.dart';
 // Google Map
 import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 // file
+
+class Const {
+  static const routeFirstView = '/first';
+}
+
+class Item {
+  Item(this.lat, this.lon);
+  //Item(this.lat, this.lon, this.stamp, this.daydata);
+
+  final double lat;
+  final double lon;
+  //final int stamp;
+  //final int daydata;
+}
+
+List<Item> data = <Item>[
+  Item(35, 135),
+  Item(36, 136),
+];
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      routes: <String, WidgetBuilder>{
+        //Const.routeFirstView: (BuildContext context) => MapView(),
+      },
+      home: MyMap(),
+    );
+  }
+}
 
 class MyMap extends StatefulWidget {
   MyMap({Key? key, this.title}) : super(key: key);
@@ -17,66 +51,74 @@ class MyMap extends StatefulWidget {
 
 class _MyMap extends State<MyMap> {
   /* Latitude & Longitude */
-  // 現在地を取得
-  double _lat = 0.0;
-  double _lon = 0.0;
-  Future<void> getLocation() async {
-    // 現在の位置を返す
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
 
   /*Future<void> _goToTheLake() async {
     final GoogleMapController controller = await _controller.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
   }*/
 
+  final List _myMarker = [];
   /* Google Map */
-  Completer<GoogleMapController> _controller = Completer();
-
-  // 位置情報
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+  final Completer<GoogleMapController> _mapController = Completer();
+  // 初期表示位置を渋谷駅に設定
+  final Position _initialPosition = Position(
+    latitude: 35.658034,
+    longitude: 139.701636,
+    timestamp: DateTime.now(),
+    altitude: 0,
+    accuracy: 0,
+    heading: 0,
+    floor: null,
+    speed: 0,
+    speedAccuracy: 0,
   );
-  static final LatLng _kMapCenter1 =
-      LatLng(37.43296265331129, -122.08832357078792);
-  static final LatLng _kMapCenter2 =
-      LatLng(37.43306265331129, -122.08830057078792);
-
-  //LatLng _mapping = LatLng(_lat, _lon);
-
-  // マーカーの情報
-  Set<Marker> _createMarker() {
-    return {
-      Marker(
-          markerId: MarkerId("marker_1"),
-          position: _kMapCenter1,
-          icon: BitmapDescriptor.defaultMarkerWithHue(5.4),
-          infoWindow: InfoWindow(title: "みかん", snippet: 'みかんじゃない')),
-      Marker(
-        markerId: MarkerId("marker_2"),
-        position: _kMapCenter1,
-      ),
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title!),
-      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text('useState example')),
       body: GoogleMap(
+        // マップとマーカー表示
+        onMapCreated: _mapController.complete,
+        markers: Set.from(_myMarker),
+        //onTap: _hand,
+        // 初期位置
+        initialCameraPosition: CameraPosition(
+          target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
+          zoom: 17.0,
+        ),
+        // 地図タイプ
         mapType: MapType.normal,
-        markers: _createMarker(),
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
+        // 現在地マーク
+        myLocationEnabled: true,
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: getLocation, child: Icon(Icons.location_on)),
+          onPressed: _getLocation, child: Icon(Icons.star)),
     );
   }
+
+  _getLocation() async {
+    final cPosition = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    print(LatLng(cPosition.latitude, cPosition.longitude));
+    print(data);
+    data.add(Item(cPosition.latitude, cPosition.longitude));
+    setState(() {
+      //myMarker = [];
+      _myMarker.add(Marker(
+        markerId: MarkerId(cPosition.toString()),
+        position: LatLng(cPosition.latitude, cPosition.longitude),
+      ));
+    });
+  }
+
+  /*_hand(LatLng tapPoint) {
+    setState(() {
+      _myMarker.add(Marker(
+        markerId: MarkerId(tapPoint.toString()),
+        position: tapPoint,
+      ));
+    });
+  }*/
 }

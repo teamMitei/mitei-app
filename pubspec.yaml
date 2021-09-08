@@ -27,6 +27,7 @@ dependencies:
   google_maps_flutter: any
   # Map Latitude & Longitude
   geolocator: ^7.0.3
+  location: any
   # csv
   path_provider: any
   # hooks
