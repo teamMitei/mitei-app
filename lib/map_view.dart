@@ -5,20 +5,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import 'package:location_3/stamp/stamp_01.dart';
-import 'package:location_3/stamp/stamp_02.dart';
-import 'package:location_3/stamp/stamp_03.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:volume_control/volume_control.dart';
 import 'dart:io';
-
-class TabInfo {
-  String label;
-  Widget widget;
-  TabInfo(this.label, this.widget);
-}
 
 class MainPage extends StatefulWidget {
   @override
@@ -33,36 +23,6 @@ class MapView extends State<MainPage> with SingleTickerProviderStateMixin {
   late Timer _timer;
 
   double _val = 50;
-
-  final List<TabInfo> _tabs = [
-    TabInfo(
-      '画像1',
-      Page01(),
-    ),
-    TabInfo(
-      '画像2',
-      Page02(),
-    ),
-    TabInfo(
-      "画像3",
-      Page03(),
-    ),
-  ];
-
-  late TabController _tabController;
-  //--------------
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(vsync: this, length: _tabs.length);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   final myController = TextEditingController();
   String _imageText = 'images/tiny02.jpg';
