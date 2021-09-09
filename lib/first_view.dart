@@ -956,10 +956,30 @@ class _MapView extends HookWidget {
           zoom: 14.4746,
         ),
         onMapCreated: _mapController.complete,
-        markers: markers.value.values.toSet(),
+        markers: _createMarker(position),
       ),
     );
   }
+  static final LatLng _kMapCenter1 = LatLng(34.652499, 135.506306);
+  static final LatLng _kMapCenter2 = LatLng(34.64000, 135.49000);
+
+  Set<Marker> _createMarker(ValueNotifier<Position> position) {
+    return {
+      Marker(
+          markerId: MarkerId("marker_1"),
+          position: _kMapCenter1,
+      ),
+      Marker(
+        markerId: MarkerId("marker_3"),
+        position: LatLng(position.value.latitude-0.01, position.value.longitude),
+      ),
+      Marker(
+        markerId: MarkerId("marker_2"),
+        position: LatLng(position.value.latitude, position.value.longitude),
+      ),
+    };
+  }
+
 
   Future<void> _setCurrentLocation(ValueNotifier<Position> position,
       ValueNotifier<Map<String, Marker>> markers) async {
