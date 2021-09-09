@@ -164,42 +164,50 @@ class _MyHomePageState extends State<MyHomePage>
                       builder: (_) {
                         return AlertDialog(
                           title: Text(
-                            "110番通報する",
+                            "110番通報",
                             textAlign: TextAlign.center,
                           ),
                           actions: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Container(
-                                  child: ElevatedButton(
-                                    child: Text('call'),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.orange,
-                                      onPrimary: Colors.white,
+                            Container(
+                                height: deviceHeight * 0.1,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Container(
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.lightGreen,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.call,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () {
+                                            var url =
+                                                'https://flutter.keicode.com/';
+                                            _launchUrl('$url');
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                    onPressed: () {
-                                      // ここにボタンを押した時に呼ばれるコードを書く
-                                      var url = 'https://flutter.keicode.com/';
-                                      _launchUrl('$url');
-                                    },
-                                  ),
-                                ),
-                                Container(
-                                  child: ElevatedButton(
-                                    child: Text('cancel'),
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.orange,
-                                      onPrimary: Colors.white,
+                                    Container(
+                                      child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.red,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.cancel_sharp,
+                                            color: Colors.black,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                        ),
+                                      ),
                                     ),
-                                    onPressed: () {
-                                      // ここにボタンを押した時に呼ばれるコードを書く
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ),
-                              ],
-                            )
+                                  ],
+                                )),
                           ],
                         );
                       },
@@ -288,8 +296,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                 if (Platform.isAndroid) {
                                                   FlutterRingtonePlayer.stop();
                                                 } else if (Platform.isIOS) {
-                                                  if (_timer != null &&
-                                                      _timer.isActive)
+                                                  if (_timer.isActive)
                                                     _timer.cancel();
                                                 }
                                               }
@@ -313,8 +320,7 @@ class _MyHomePageState extends State<MyHomePage>
                                         if (Platform.isAndroid) {
                                           FlutterRingtonePlayer.stop();
                                         } else if (Platform.isIOS) {
-                                          if (_timer != null && _timer.isActive)
-                                            _timer.cancel();
+                                          if (_timer.isActive) _timer.cancel();
                                         }
                                       },
                                     ),
