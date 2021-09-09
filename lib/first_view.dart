@@ -28,12 +28,48 @@ void postMap(double latitude, double longitude, int rank) async {
           .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
       headers: {"Content-Type": "application/json"});
   print(response.body);
+  //print('${jsonDecode(response.body)['data']['id']}');
+}
+
+void postMapFirst(
+    double latitude, double longitude, int rank, String comment_body) async {
+  final response = await http.post(
+      Uri.parse('https://hack-u-mitei.herokuapp.com/maps'),
+      body: json
+          .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
+      headers: {"Content-Type": "application/json"});
+  print(response.body);
+  // int id = jsonDecode(response.body)['data']['id'];
+  // print(id);
+  // postMapComment(comment_body, id);
+}
+
+//マップに基づいたコメントの表示
+void getMapComment(int map_id) async {
+  final response = await http.get(Uri.parse(
+      'https://hack-u-mitei.herokuapp.com/maps/comment/' + map_id.toString()));
+  print(response.body);
+}
+
+void postMapComment(String comment_context, int maps_id) async {
+  final response = await http.post(
+      Uri.parse('https://hack-u-mitei.herokuapp.com/comments'),
+      body: json.encode({"body": comment_context, "maps_id": maps_id}),
+      headers: {"Content-Type": "application/json"});
+  print(response.body);
 }
 
 //----------------------------------------------------------------------------------
 
 class Const {
   static const routeFirstView = '/first';
+}
+
+//
+@override
+void initState() {
+  //アプリ起動時に一度だけ実行される
+  getMaps();
 }
 
 class FirstView extends StatelessWidget {
@@ -69,6 +105,7 @@ class _MyHomePageState extends State<MyHomePage>
 
   final myController = TextEditingController();
   String _imageText = 'images/tiny02.jpg';
+  int rankStamp = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -405,6 +442,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                   setState(() {
                                                     _imageText =
                                                         'images/tiny02.jpg';
+                                                    rankStamp = 1;
                                                   });
                                                 },
                                               ),
@@ -421,6 +459,13 @@ class _MyHomePageState extends State<MyHomePage>
                                                   setState(() {
                                                     _imageText =
                                                         'images/tiny02.jpg';
+                                                    //データ送信------------------------
+                                                    postMapFirst(
+                                                        200,
+                                                        200,
+                                                        rankStamp,
+                                                        myController.text);
+                                                    //--------------------------------
                                                   });
                                                 },
                                               ),
@@ -460,6 +505,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                     setState(() {
                                                       _imageText =
                                                           'images/tiny02.jpg';
+                                                      rankStamp = 1;
                                                     });
                                                   },
                                                 ),
@@ -480,6 +526,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                     setState(() {
                                                       _imageText =
                                                           'images/tiny03.jpg';
+                                                      rankStamp = 2;
                                                     });
                                                   },
                                                 ),
@@ -500,6 +547,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                     setState(() {
                                                       _imageText =
                                                           'images/tiny04.jpg';
+                                                      rankStamp = 3;
                                                     });
                                                   },
                                                 ),
@@ -517,6 +565,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                   ),
                                                   onPressed: () {
                                                     // ここにボタンを押した時に呼ばれるコードを書く
+                                                    rankStamp = 4;
                                                   },
                                                 ),
                                               ),
@@ -635,7 +684,6 @@ class _MapView extends HookWidget {
       final marker = Marker(
           markerId: MarkerId(currentPosition.timestamp.toString()),
           position: LatLng(currentPosition.latitude, currentPosition.longitude),
-
           //追記----------------------------------------------------------------------
           onTap: () {
             print('tap');
