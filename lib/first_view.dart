@@ -10,6 +10,28 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+// マップの登録位置群を取得-------------------------------------------------------------
+void getMaps() async {
+  final response =
+      await http.get(Uri.parse('https://hack-u-mitei.herokuapp.com/maps'));
+  print(response.body);
+}
+
+// マップ位置の登録　(経度，緯度，スタンプランク)
+void postMap(double latitude, double longitude, int rank) async {
+  final response = await http.post(
+      Uri.parse('https://hack-u-mitei.herokuapp.com/maps'),
+      body: json
+          .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
+      headers: {"Content-Type": "application/json"});
+  print(response.body);
+}
+
+//----------------------------------------------------------------------------------
+
 class Const {
   static const routeFirstView = '/first';
 }
