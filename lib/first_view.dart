@@ -39,16 +39,18 @@ void postMapFirst(
           .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
       headers: {"Content-Type": "application/json"});
   print(response.body);
-  // int id = jsonDecode(response.body)['data']['id'];
-  // print(id);
-  // postMapComment(comment_body, id);
+  int id = jsonDecode(response.body)['data']['id'];
+  print(id);
+  postMapComment(comment_body, id);
 }
 
 //マップに基づいたコメントの表示
-void getMapComment(int map_id) async {
+Future<String> getMapComment(int map_id) async {
   final response = await http.get(Uri.parse(
       'https://hack-u-mitei.herokuapp.com/maps/comment/' + map_id.toString()));
   print(response.body);
+  print(jsonDecode(response.body)['data'][0]['body']);
+  return Future<String>.value(response.body);
 }
 
 void postMapComment(String comment_context, int maps_id) async {
@@ -94,6 +96,8 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+bool testFlag = false;
+
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
   var _status = 'Ready';
@@ -111,17 +115,22 @@ class _MyHomePageState extends State<MyHomePage>
   Widget build(BuildContext context) {
     final double deviceHeight = MediaQuery.of(context).size.height;
 
-    final items = [
-      'qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq',
-      'ffff',
-      'ffff',
-      'ffff',
-      'ffff',
-      'ffff',
-      'ffff',
-      'ffff',
-      'ffff'
-    ];
+    var items = [];
+
+    var textList = getMapComment(44);
+    // textList.then((value) {
+    //   int idCount = 0;
+    //   try {
+    //     setState(() {
+    //       while (true) {
+    //         items.add(jsonDecode(value)['data'][idCount]['body']);
+    //         idCount += 1;
+    //       }
+    //     });
+    //   } catch (e) {
+    //     print(idCount);
+    //   }
+    // });
 
     //listViewのSize等の指定
     Widget setupAlertDialoadContainer() {
@@ -160,6 +169,22 @@ class _MyHomePageState extends State<MyHomePage>
                     child: IconButton(
                       icon: Icon(Icons.comment),
                       onPressed: () {
+                        getMapComment(44);
+                        textList.then((value) {
+                          items = [];
+                          int idCount = 0;
+                          try {
+                            setState(() {
+                              while (true) {
+                                items.add(
+                                    jsonDecode(value)['data'][idCount]['body']);
+                                idCount += 1;
+                              }
+                            });
+                          } catch (e) {
+                            print(idCount);
+                          }
+                        });
                         showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -177,19 +202,285 @@ class _MyHomePageState extends State<MyHomePage>
                                     children: [
                                       Center(
                                         child: ElevatedButton(
-                                          child: const Text('write'),
+                                          child: const Text('コメントする'),
                                           style: ElevatedButton.styleFrom(
                                             primary: Colors.orange,
                                             onPrimary: Colors.white,
                                           ),
                                           onPressed: () {
                                             // ここにボタンを押した時に呼ばれるコードを書く
+                                            showModalBottomSheet(
+                                                //モーダルの背景の色、透過
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                //ドラッグ可能にする（高さもハーフサイズからフルサイズになる様子）
+                                                isScrollControlled: true,
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return StatefulBuilder(
+                                                      builder: (BuildContext
+                                                              context,
+                                                          StateSetter
+                                                              setState /*You can rename this!*/) {
+                                                    return Container(
+                                                      margin: EdgeInsets.only(
+                                                          top: 64),
+                                                      decoration: BoxDecoration(
+                                                        //モーダル自体の色
+                                                        color: Colors.white,
+                                                        //角丸にする
+                                                        borderRadius:
+                                                            BorderRadius.only(
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  20),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  20),
+                                                        ),
+                                                      ),
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            children: <Widget>[
+                                                              Container(
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceEvenly,
+                                                                  children: [
+                                                                    Container(
+                                                                      child:
+                                                                          TextButton(
+                                                                        child: const Text(
+                                                                            'キャンセル'),
+                                                                        style: TextButton
+                                                                            .styleFrom(
+                                                                          primary:
+                                                                              Colors.black,
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          myController.text =
+                                                                              '';
+                                                                          setState(
+                                                                              () {
+                                                                            _imageText =
+                                                                                'images/tiny02.jpg';
+                                                                            rankStamp =
+                                                                                1;
+                                                                          });
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      child:
+                                                                          ElevatedButton(
+                                                                        child: const Text(
+                                                                            '投稿'),
+                                                                        style: ElevatedButton
+                                                                            .styleFrom(
+                                                                          primary:
+                                                                              Colors.blue,
+                                                                          onPrimary:
+                                                                              Colors.black,
+                                                                          shape:
+                                                                              const StadiumBorder(),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          setState(
+                                                                              () {
+                                                                            _imageText =
+                                                                                'images/tiny02.jpg';
+                                                                            //データ送信------------------------
+                                                                            postMapComment(myController.text,
+                                                                                44);
+                                                                            //--------------------------------
+                                                                          });
+                                                                          Navigator.pop(
+                                                                              context);
+                                                                          myController.text =
+                                                                              '';
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                child:
+                                                                    TextField(
+                                                                  maxLines: 4,
+                                                                  controller:
+                                                                      myController,
+                                                                  autofocus:
+                                                                      true,
+                                                                  decoration:
+                                                                      InputDecoration(
+                                                                    hintText:
+                                                                        'コメントを入力',
+                                                                    fillColor:
+                                                                        Colors.grey[
+                                                                            200],
+                                                                    filled:
+                                                                        true,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                child: Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .spaceBetween,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Container(
+                                                                      child:
+                                                                          SizedBox(
+                                                                        height: deviceHeight *
+                                                                            0.1,
+                                                                        width: deviceHeight *
+                                                                            0.1,
+                                                                        child:
+                                                                            IconButton(
+                                                                          icon:
+                                                                              Image.asset(
+                                                                            'images/tiny02.jpg',
+                                                                            width:
+                                                                                deviceHeight * 0.6,
+                                                                            height:
+                                                                                deviceHeight * 0.6,
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            // ここにボタンを押した時に呼ばれるコードを書く
+                                                                            setState(() {
+                                                                              _imageText = 'images/tiny02.jpg';
+                                                                              rankStamp = 1;
+                                                                            });
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      child:
+                                                                          SizedBox(
+                                                                        height: deviceHeight *
+                                                                            0.1,
+                                                                        width: deviceHeight *
+                                                                            0.1,
+                                                                        child:
+                                                                            IconButton(
+                                                                          icon:
+                                                                              Image.asset(
+                                                                            'images/tiny03.jpg',
+                                                                            width:
+                                                                                deviceHeight * 0.6,
+                                                                            height:
+                                                                                deviceHeight * 0.6,
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            // ここにボタンを押した時に呼ばれるコードを書く
+                                                                            setState(() {
+                                                                              _imageText = 'images/tiny03.jpg';
+                                                                              rankStamp = 2;
+                                                                            });
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      child:
+                                                                          SizedBox(
+                                                                        height: deviceHeight *
+                                                                            0.1,
+                                                                        width: deviceHeight *
+                                                                            0.1,
+                                                                        child:
+                                                                            IconButton(
+                                                                          icon:
+                                                                              Image.asset(
+                                                                            'images/tiny04.jpg',
+                                                                            width:
+                                                                                deviceHeight * 0.6,
+                                                                            height:
+                                                                                deviceHeight * 0.6,
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            // ここにボタンを押した時に呼ばれるコードを書く
+                                                                            setState(() {
+                                                                              _imageText = 'images/tiny04.jpg';
+                                                                              rankStamp = 3;
+                                                                            });
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    Container(
+                                                                      child:
+                                                                          SizedBox(
+                                                                        height: deviceHeight *
+                                                                            0.1,
+                                                                        width: deviceHeight *
+                                                                            0.1,
+                                                                        child:
+                                                                            IconButton(
+                                                                          icon:
+                                                                              Image.asset(
+                                                                            'images/tiny02.jpg',
+                                                                            width:
+                                                                                deviceHeight * 0.6,
+                                                                            height:
+                                                                                deviceHeight * 0.6,
+                                                                          ),
+                                                                          onPressed:
+                                                                              () {
+                                                                            // ここにボタンを押した時に呼ばれるコードを書く
+                                                                            rankStamp =
+                                                                                4;
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                child: Center(
+                                                                  child: Image
+                                                                      .asset(
+                                                                    '$_imageText',
+                                                                    width:
+                                                                        deviceHeight *
+                                                                            0.15,
+                                                                    height:
+                                                                        deviceHeight *
+                                                                            0.15,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  });
+                                                });
                                           },
                                         ),
                                       ),
                                       Center(
                                         child: ElevatedButton(
-                                          child: const Text('cancel'),
+                                          child: const Text('閉じる'),
                                           style: ElevatedButton.styleFrom(
                                             primary: Colors.orange,
                                             onPrimary: Colors.white,
@@ -467,6 +758,8 @@ class _MyHomePageState extends State<MyHomePage>
                                                         myController.text);
                                                     //--------------------------------
                                                   });
+                                                  Navigator.pop(context);
+                                                  myController.text = '';
                                                 },
                                               ),
                                             ),
@@ -685,9 +978,7 @@ class _MapView extends HookWidget {
           markerId: MarkerId(currentPosition.timestamp.toString()),
           position: LatLng(currentPosition.latitude, currentPosition.longitude),
           //追記----------------------------------------------------------------------
-          onTap: () {
-            print('tap');
-          }
+          onTap: () {}
           //--------------------------------------------------------------------------
           );
       markers.value.clear();
