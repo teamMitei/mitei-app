@@ -12,6 +12,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'Dart:ui' as ui;
 
 // マップの登録位置群を取得-------------------------------------------------------------
 Future<String> getMaps() async {
@@ -150,6 +151,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   void initState() {
     super.initState();
+
     //アプリ起動時に一度だけ実行される
     locationList = getMaps();
 
@@ -198,6 +200,23 @@ class _MyHomePageState extends State<MyHomePage>
     //     print(idCount);
     //   }
     // });
+    Future _setMapCom() async {
+      getMapComment(44);
+      textList.then((value) {
+        items = [];
+        int idCount = 0;
+        try {
+          setState(() {
+            while (true) {
+              items.add(jsonDecode(value)['data'][idCount]['body']);
+              idCount += 1;
+            }
+          });
+        } catch (e) {
+          print(idCount);
+        }
+      });
+    }
 
     //listViewのSize等の指定
     Widget setupAlertDialoadContainer() {
@@ -235,23 +254,8 @@ class _MyHomePageState extends State<MyHomePage>
                   Container(
                     child: IconButton(
                       icon: Icon(Icons.comment),
-                      onPressed: () {
-                        getMapComment(44);
-                        textList.then((value) {
-                          items = [];
-                          int idCount = 0;
-                          try {
-                            setState(() {
-                              while (true) {
-                                items.add(
-                                    jsonDecode(value)['data'][idCount]['body']);
-                                idCount += 1;
-                              }
-                            });
-                          } catch (e) {
-                            print(idCount);
-                          }
-                        });
+                      onPressed: () async {
+                        await _setMapCom();
                         showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -268,12 +272,8 @@ class _MyHomePageState extends State<MyHomePage>
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       Center(
-                                        child: ElevatedButton(
-                                          child: const Text('コメントする'),
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Colors.orange,
-                                            onPrimary: Colors.white,
-                                          ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.add_comment),
                                           onPressed: () {
                                             // ここにボタンを押した時に呼ばれるコードを書く
                                             showModalBottomSheet(
@@ -361,7 +361,8 @@ class _MyHomePageState extends State<MyHomePage>
                                                                               const StadiumBorder(),
                                                                         ),
                                                                         onPressed:
-                                                                            () {
+                                                                            () async {
+                                                                          await _setMapCom();
                                                                           setState(
                                                                               () {
                                                                             _imageText =
@@ -546,12 +547,8 @@ class _MyHomePageState extends State<MyHomePage>
                                         ),
                                       ),
                                       Center(
-                                        child: ElevatedButton(
-                                          child: const Text('閉じる'),
-                                          style: ElevatedButton.styleFrom(
-                                            primary: Colors.orange,
-                                            onPrimary: Colors.white,
-                                          ),
+                                        child: IconButton(
+                                          icon: Icon(Icons.close),
                                           onPressed: () {
                                             // ここにボタンを押した時に呼ばれるコードを書く
                                             Navigator.pop(context);
@@ -991,6 +988,19 @@ class MyMap extends StatefulWidget {
 }
 
 class _MyMap extends State<MyMap> {
+
+  
+  late BitmapDescriptor pinLocationIcon;
+  @override
+  void initState() {
+    super.initState();
+    setCustomMapPin();
+  }
+
+  void setCustomMapPin() async {
+    pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 0.3), 'images/tiny02.jpg');
+  }
   /* Latitude & Longitude */
 
   /*Future<void> _goToTheLake() async {
@@ -999,6 +1009,7 @@ class _MyMap extends State<MyMap> {
   }*/
 
   final List _myMarker = [];
+
   /* Google Map */
   final Completer<GoogleMapController> _mapController = Completer();
   // 初期表示位置を渋谷駅に設定
@@ -1016,24 +1027,11 @@ class _MyMap extends State<MyMap> {
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < data.length; i++) {
-      //print(latitudeList);
-      setState(() {
-        //myMarker = [];
-        _myMarker.add(
-          Marker(
-              markerId: MarkerId(i.toString()),
-              position: LatLng(data[i].getlet(), data[i].getlon())),
-        );
-      });
-    }
-
     return Scaffold(
       body: GoogleMap(
         // マップとマーカー表示
         onMapCreated: _mapController.complete,
         markers: Set.from(_myMarker),
-        //onTap: _hand,
         // 初期位置
         initialCameraPosition: CameraPosition(
           target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
@@ -1092,6 +1090,8 @@ class _MyMap extends State<MyMap> {
     );
   }
 
+
+
   _getLocation() async {
     final cPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
@@ -1099,13 +1099,13 @@ class _MyMap extends State<MyMap> {
     print(LatLng(cPosition.latitude, cPosition.longitude));
     print(data);
     data.add(Item(cPosition.latitude, cPosition.longitude));
-    // setState(() {
-    //   //myMarker = [];
-    //   _myMarker.add(Marker(
-    //     markerId: MarkerId(cPosition.toString()),
-    //     position: LatLng(cPosition.latitude, cPosition.longitude),
-    //   ));
-    // });
+    setState(() {
+      //myMarker = [];
+      _myMarker.add(Marker(
+        markerId: MarkerId(cPosition.toString()),
+        position: LatLng(cPosition.latitude, cPosition.longitude),
+      ));
+    });
     print(latitudeList);
     print(longitudeList);
     for (int i = 0; i < latitudeList.length; i++) {
@@ -1115,13 +1115,15 @@ class _MyMap extends State<MyMap> {
         _myMarker.add(
           Marker(
               markerId: MarkerId(i.toString()),
-              position: LatLng(latitudeList[i], longitudeList[i])),
+              position: LatLng(latitudeList[i], longitudeList[i]),
+              icon: pinLocationIcon,
+              //infoWindow: InfoWindow(Image: Image.asset(pinLocationIcon)),
+              ),
         );
       });
     }
   }
 }
-
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
