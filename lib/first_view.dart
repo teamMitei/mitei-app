@@ -12,12 +12,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'Dart:ui' as ui;
 
 // マップの登録位置群を取得-------------------------------------------------------------
 Future<String> getMaps() async {
-  final response =
-      await http.get(Uri.parse('https://hack-u-mitei.herokuapp.com/maps'));
+  final response = await http
+      .get(Uri.parse('https://mitei-backend-api-v2.herokuapp.com/maps'));
   print(response.body);
   return Future<String>.value(response.body);
 }
@@ -25,7 +24,7 @@ Future<String> getMaps() async {
 // マップ位置の登録　(経度，緯度，スタンプランク)
 void postMap(double latitude, double longitude, int rank) async {
   final response = await http.post(
-      Uri.parse('https://hack-u-mitei.herokuapp.com/maps'),
+      Uri.parse('https://mitei-backend-api-v2.herokuapp.com/maps'),
       body: json
           .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
       headers: {"Content-Type": "application/json"});
@@ -36,29 +35,31 @@ void postMap(double latitude, double longitude, int rank) async {
 void postMapFirst(
     double latitude, double longitude, int rank, String comment_body) async {
   final response = await http.post(
-      Uri.parse('https://hack-u-mitei.herokuapp.com/maps'),
+      Uri.parse('https://mitei-backend-api-v2.herokuapp.com/maps'),
       body: json
           .encode({"latitude": latitude, "longitude": longitude, "rank": rank}),
       headers: {"Content-Type": "application/json"});
   print(response.body);
   int id = jsonDecode(response.body)['data']['id'];
   print(id);
-  postMapComment(comment_body, id);
+  postMapComment(comment_body, id, rank);
 }
 
 //マップに基づいたコメントの表示
 Future<String> getMapComment(int map_id) async {
   final response = await http.get(Uri.parse(
-      'https://hack-u-mitei.herokuapp.com/maps/comment/' + map_id.toString()));
+      'https://mitei-backend-api-v2.herokuapp.com/maps/comment/' +
+          map_id.toString()));
   print(response.body);
-  print(jsonDecode(response.body)['data'][0]['body']);
+  //print(jsonDecode(response.body)['data'][0]['body']);
   return Future<String>.value(response.body);
 }
 
-void postMapComment(String comment_context, int maps_id) async {
+void postMapComment(String comment_context, int maps_id, int rank) async {
   final response = await http.post(
-      Uri.parse('https://hack-u-mitei.herokuapp.com/comments'),
-      body: json.encode({"body": comment_context, "maps_id": maps_id}),
+      Uri.parse('https://mitei-backend-api-v2.herokuapp.com/comments'),
+      body: json
+          .encode({"body": comment_context, "maps_id": maps_id, "rank": rank}),
       headers: {"Content-Type": "application/json"});
   print(response.body);
 }
@@ -104,7 +105,14 @@ List<Item> data = <Item>[
 late Future<String> locationList;
 var latitudeList = [];
 var longitudeList = [];
+var locationIdList = [];
+var locationStamplist = [];
 int idLocationCount = 0;
+
+late Position cPosition;
+
+late final Position currentLocationX;
+late final Position currentLocationY;
 
 Map locationMaps = {};
 
@@ -158,6 +166,8 @@ class _MyHomePageState extends State<MyHomePage>
     locationList.then((value) {
       latitudeList = [];
       longitudeList = [];
+      locationIdList = [];
+      locationStamplist = [];
       idLocationCount = 0;
       try {
         while (true) {
@@ -167,6 +177,9 @@ class _MyHomePageState extends State<MyHomePage>
               .add(jsonDecode(value)['data'][idLocationCount]['latitude']);
           longitudeList
               .add(jsonDecode(value)['data'][idLocationCount]['longitude']);
+          locationIdList.add(jsonDecode(value)['data'][idLocationCount]['id']);
+          locationStamplist
+              .add(jsonDecode(value)['data'][idLocationCount]['rank']);
           idLocationCount += 1;
         }
       } catch (e) {
@@ -185,8 +198,10 @@ class _MyHomePageState extends State<MyHomePage>
     final double deviceHeight = MediaQuery.of(context).size.height;
 
     var items = [];
+    var stampNum = [];
+    String stampName = 'tiny02.jpg';
 
-    var textList = getMapComment(44);
+    var textList = getMapComment(1);
     // textList.then((value) {
     //   int idCount = 0;
     //   try {
@@ -201,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage>
     //   }
     // });
     Future _setMapCom() async {
-      getMapComment(44);
+      getMapComment(1);
       textList.then((value) {
         items = [];
         int idCount = 0;
@@ -209,6 +224,7 @@ class _MyHomePageState extends State<MyHomePage>
           setState(() {
             while (true) {
               items.add(jsonDecode(value)['data'][idCount]['body']);
+              stampNum.add(jsonDecode(value)['data'][idCount]['rank']);
               idCount += 1;
             }
           });
@@ -228,8 +244,21 @@ class _MyHomePageState extends State<MyHomePage>
             shrinkWrap: true,
             itemCount: items.length,
             itemBuilder: (BuildContext context, int index) {
+              if (stampNum[index] == 1) {
+                stampName = 'tiny02.jpg';
+              } else if (stampNum[index] == 2) {
+                stampName = 'tiny03.jpg';
+              } else if (stampNum[index] == 3) {
+                stampName = 'tiny04.jpg';
+              } else if (stampNum[index] == 4) {
+                stampName = 'tiny05.jpg';
+              } else if (stampNum[index] == 5) {
+                stampName = 'tiny06.jpg';
+              } else {
+                stampName = 'tiny02.jpg';
+              }
               return ListTile(
-                leading: Image.asset('images/tiny02.jpg'),
+                leading: Image.asset('images/' + stampName),
                 title: Text('${items[index]}'),
               );
             },
@@ -254,8 +283,8 @@ class _MyHomePageState extends State<MyHomePage>
                   Container(
                     child: IconButton(
                       icon: Icon(Icons.comment),
-                      onPressed: () async {
-                        await _setMapCom();
+                      onPressed: () {
+                        _setMapCom();
                         showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -334,6 +363,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                                             () {
                                                                           Navigator.pop(
                                                                               context);
+
                                                                           myController.text =
                                                                               '';
                                                                           setState(
@@ -368,10 +398,14 @@ class _MyHomePageState extends State<MyHomePage>
                                                                             _imageText =
                                                                                 'images/tiny02.jpg';
                                                                             //データ送信------------------------
-                                                                            postMapComment(myController.text,
-                                                                                44);
+                                                                            postMapComment(
+                                                                                myController.text,
+                                                                                1,
+                                                                                rankStamp);
                                                                             //--------------------------------
                                                                           });
+                                                                          Navigator.pop(
+                                                                              context);
                                                                           Navigator.pop(
                                                                               context);
                                                                           myController.text =
@@ -818,10 +852,11 @@ class _MyHomePageState extends State<MyHomePage>
                                                         'images/tiny02.jpg';
                                                     //データ送信------------------------
                                                     postMapFirst(
-                                                        200,
-                                                        200,
+                                                        cPosition.latitude,
+                                                        cPosition.longitude,
                                                         rankStamp,
                                                         myController.text);
+                                                    print(cPosition.latitude);
                                                     //--------------------------------
                                                   });
                                                   Navigator.pop(context);
@@ -918,13 +953,17 @@ class _MyHomePageState extends State<MyHomePage>
                                                 width: deviceHeight * 0.1,
                                                 child: IconButton(
                                                   icon: Image.asset(
-                                                    'images/tiny02.jpg',
+                                                    'images/tiny05.jpg',
                                                     width: deviceHeight * 0.6,
                                                     height: deviceHeight * 0.6,
                                                   ),
                                                   onPressed: () {
                                                     // ここにボタンを押した時に呼ばれるコードを書く
-                                                    rankStamp = 4;
+                                                    setState(() {
+                                                      _imageText =
+                                                          'images/tiny05.jpg';
+                                                      rankStamp = 4;
+                                                    });
                                                   },
                                                 ),
                                               ),
@@ -990,18 +1029,46 @@ class MyMap extends StatefulWidget {
 }
 
 class _MyMap extends State<MyMap> {
+  late BitmapDescriptor pinLocationIcon01;
+  late BitmapDescriptor pinLocationIcon02;
+  late BitmapDescriptor pinLocationIcon03;
+  late BitmapDescriptor pinLocationIcon04;
+  late BitmapDescriptor pinLocationIcon05;
+  late BitmapDescriptor mapIcons;
 
-  
-  late BitmapDescriptor pinLocationIcon;
   @override
   void initState() {
     super.initState();
-    setCustomMapPin();
+    setCustomMapPin01();
+    setCustomMapPin02();
+    setCustomMapPin03();
+    setCustomMapPin04();
+    setCustomMapPin05();
   }
 
-  void setCustomMapPin() async {
-    pinLocationIcon = await BitmapDescriptor.fromAssetImage(
+  void setCustomMapPin01() async {
+    pinLocationIcon01 = await BitmapDescriptor.fromAssetImage(
         ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny02_2.jpg');
+  }
+
+  void setCustomMapPin02() async {
+    pinLocationIcon02 = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny03_2.jpg');
+  }
+
+  void setCustomMapPin03() async {
+    pinLocationIcon03 = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny04_2.jpg');
+  }
+
+  void setCustomMapPin04() async {
+    pinLocationIcon04 = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny05_2.jpg');
+  }
+
+  void setCustomMapPin05() async {
+    pinLocationIcon05 = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny06_2.jpg');
   }
   /* Latitude & Longitude */
 
@@ -1045,7 +1112,7 @@ class _MyMap extends State<MyMap> {
         myLocationEnabled: true,
       ),
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniStartFloat,
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).accentColor,
         onPressed: () {
@@ -1092,36 +1159,48 @@ class _MyMap extends State<MyMap> {
     );
   }
 
-
-
   _getLocation() async {
-    final cPosition = await Geolocator.getCurrentPosition(
+    cPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
     print(LatLng(cPosition.latitude, cPosition.longitude));
     print(data);
     data.add(Item(cPosition.latitude, cPosition.longitude));
+    print(cPosition.latitude);
     setState(() {
       //myMarker = [];
       _myMarker.add(Marker(
         markerId: MarkerId(cPosition.toString()),
         position: LatLng(cPosition.latitude, cPosition.longitude),
-        icon: pinLocationIcon,
+        //icon: pinLocationIcon,
       ));
     });
-    print(latitudeList);
-    print(longitudeList);
+    // print(latitudeList);
+    // print(longitudeList);
+    //print(locationIdList);
+    print(locationStamplist);
     for (int i = 0; i < latitudeList.length; i++) {
       //print(latitudeList);
       setState(() {
+        if (locationStamplist[i] == 1) {
+          mapIcons = pinLocationIcon01;
+        } else if (locationStamplist[i] == 2) {
+          mapIcons = pinLocationIcon02;
+        } else if (locationStamplist[i] == 3) {
+          mapIcons = pinLocationIcon03;
+        } else if (locationStamplist[i] == 4) {
+          mapIcons = pinLocationIcon04;
+        } else if (locationStamplist[i] == 5) {
+          mapIcons = pinLocationIcon05;
+        }
         //myMarker = [];
         _myMarker.add(
           Marker(
-              markerId: MarkerId(i.toString()),
-              position: LatLng(latitudeList[i], longitudeList[i]),
-              icon: pinLocationIcon,
-              //infoWindow: InfoWindow(Image: Image.asset(pinLocationIcon)),
-              ),
+            markerId: MarkerId(locationIdList[i].toString()),
+            position: LatLng(latitudeList[i], longitudeList[i]),
+            icon: mapIcons,
+            //infoWindow: InfoWindow(Image: Image.asset(pinLocationIcon)),
+          ),
         );
       });
     }
