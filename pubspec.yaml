@@ -37,6 +37,7 @@ dev_dependencies:
     sdk: flutter
   url_launcher: ^6.0.10
   volume_control: ^0.1.5 
+  provider: ^4.3.2+1
 
 flutter:
   uses-material-design: true

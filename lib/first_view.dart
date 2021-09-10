@@ -117,6 +117,8 @@ late final Position currentLocationY;
 Map locationMaps = {};
 
 final List startSetMaps = [];
+
+int stampLocationId = 0;
 //
 
 class FirstView extends StatelessWidget {
@@ -1196,11 +1198,14 @@ class _MyMap extends State<MyMap> {
         //myMarker = [];
         _myMarker.add(
           Marker(
-            markerId: MarkerId(locationIdList[i].toString()),
-            position: LatLng(latitudeList[i], longitudeList[i]),
-            icon: mapIcons,
-            //infoWindow: InfoWindow(Image: Image.asset(pinLocationIcon)),
-          ),
+              markerId: MarkerId(locationIdList[i].toString()),
+              position: LatLng(latitudeList[i], longitudeList[i]),
+              icon: mapIcons,
+              onTap: () {
+                
+              }
+              //infoWindow: InfoWindow(Image: Image.asset(pinLocationIcon)),
+              ),
         );
       });
     }
