@@ -504,7 +504,7 @@ class _MyHomePageState extends State<MyHomePage>
                                                                             IconButton(
                                                                           icon:
                                                                               Image.asset(
-                                                                            'images/tiny02.jpg',
+                                                                            'images/tiny05.jpg',
                                                                             width:
                                                                                 deviceHeight * 0.6,
                                                                             height:
@@ -513,8 +513,10 @@ class _MyHomePageState extends State<MyHomePage>
                                                                           onPressed:
                                                                               () {
                                                                             // ここにボタンを押した時に呼ばれるコードを書く
-                                                                            rankStamp =
-                                                                                4;
+                                                                            setState(() {
+                                                                              _imageText = 'images/tiny05.jpg';
+                                                                              rankStamp = 4;
+                                                                            });
                                                                           },
                                                                         ),
                                                                       ),
@@ -999,7 +1001,7 @@ class _MyMap extends State<MyMap> {
 
   void setCustomMapPin() async {
     pinLocationIcon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(devicePixelRatio: 0.3), 'images/tiny02.jpg');
+        ImageConfiguration(devicePixelRatio: 2.5), 'images/tiny02_2.jpg');
   }
   /* Latitude & Longitude */
 
@@ -1104,6 +1106,7 @@ class _MyMap extends State<MyMap> {
       _myMarker.add(Marker(
         markerId: MarkerId(cPosition.toString()),
         position: LatLng(cPosition.latitude, cPosition.longitude),
+        icon: pinLocationIcon,
       ));
     });
     print(latitudeList);
