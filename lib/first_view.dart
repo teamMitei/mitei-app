@@ -68,12 +68,29 @@ class Const {
   static const routeFirstView = '/first';
 }
 
+// class Item {
+//   Item(this.lat, this.lon);
+//   //Item(this.lat, this.lon, this.stamp, this.daydata);
+
+//   final double lat;
+//   final double lon;
+//   //final int stamp;
+//   //final int daydata;
+// }
+
 class Item {
   Item(this.lat, this.lon);
   //Item(this.lat, this.lon, this.stamp, this.daydata);
 
   final double lat;
   final double lon;
+  double getlet() {
+    return this.lat;
+  }
+
+  double getlon() {
+    return this.lon;
+  }
   //final int stamp;
   //final int daydata;
 }
@@ -88,34 +105,10 @@ var latitudeList = [];
 var longitudeList = [];
 int idLocationCount = 0;
 
+Map locationMaps = {};
+
 final List startSetMaps = [];
 //
-@override
-void initState() {
-  //アプリ起動時に一度だけ実行される
-  locationList = getMaps();
-
-  locationList.then((value) {
-    latitudeList = [];
-    longitudeList = [];
-    idLocationCount = 0;
-    try {
-      while (true) {
-        latitudeList
-            .add(jsonDecode(value)['data'][idLocationCount]['latitude']);
-        longitudeList
-            .add(jsonDecode(value)['data'][idLocationCount]['longitude']);
-        idLocationCount += 1;
-      }
-    } catch (e) {
-      print(idLocationCount);
-    }
-  });
-
-  for (int i = 0; i <= idLocationCount; i++) {
-    data.add(Item(latitudeList[i], longitudeList[i]));
-  }
-}
 
 class FirstView extends StatelessWidget {
   @override
@@ -153,6 +146,37 @@ class _MyHomePageState extends State<MyHomePage>
   final myController = TextEditingController();
   String _imageText = 'images/tiny02.jpg';
   int rankStamp = 1;
+
+  @override
+  void initState() {
+    super.initState();
+    //アプリ起動時に一度だけ実行される
+    locationList = getMaps();
+
+    locationList.then((value) {
+      latitudeList = [];
+      longitudeList = [];
+      idLocationCount = 0;
+      try {
+        while (true) {
+          data.add(Item(jsonDecode(value)['data'][idLocationCount]['latitude'],
+              jsonDecode(value)['data'][idLocationCount]['longitude']));
+          latitudeList
+              .add(jsonDecode(value)['data'][idLocationCount]['latitude']);
+          longitudeList
+              .add(jsonDecode(value)['data'][idLocationCount]['longitude']);
+          idLocationCount += 1;
+        }
+      } catch (e) {
+        print(idLocationCount);
+        //print(latitudeList);
+      }
+    });
+
+    // for (int i = 0; i <= idLocationCount; i++) {
+    //   data.add(Item(latitudeList[i], longitudeList[i]));
+    // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -992,15 +1016,18 @@ class _MyMap extends State<MyMap> {
 
   @override
   Widget build(BuildContext context) {
-    for (int i = 0; i < idLocationCount; i++) {
+    for (int i = 0; i < data.length; i++) {
+      //print(latitudeList);
       setState(() {
         //myMarker = [];
-        _myMarker.add(Marker(
-          markerId: MarkerId(i.toString()),
-          position: LatLng(latitudeList[i], longitudeList[i]),
-        ));
+        _myMarker.add(
+          Marker(
+              markerId: MarkerId(i.toString()),
+              position: LatLng(data[i].getlet(), data[i].getlon())),
+        );
       });
     }
+
     return Scaffold(
       body: GoogleMap(
         // マップとマーカー表示
@@ -1072,15 +1099,29 @@ class _MyMap extends State<MyMap> {
     print(LatLng(cPosition.latitude, cPosition.longitude));
     print(data);
     data.add(Item(cPosition.latitude, cPosition.longitude));
-    setState(() {
-      //myMarker = [];
-      _myMarker.add(Marker(
-        markerId: MarkerId(cPosition.toString()),
-        position: LatLng(cPosition.latitude, cPosition.longitude),
-      ));
-    });
+    // setState(() {
+    //   //myMarker = [];
+    //   _myMarker.add(Marker(
+    //     markerId: MarkerId(cPosition.toString()),
+    //     position: LatLng(cPosition.latitude, cPosition.longitude),
+    //   ));
+    // });
+    print(latitudeList);
+    print(longitudeList);
+    for (int i = 0; i < latitudeList.length; i++) {
+      //print(latitudeList);
+      setState(() {
+        //myMarker = [];
+        _myMarker.add(
+          Marker(
+              markerId: MarkerId(i.toString()),
+              position: LatLng(latitudeList[i], longitudeList[i])),
+        );
+      });
+    }
   }
 }
+
 
 class HexColor extends Color {
   static int _getColorFromHex(String hexColor) {
