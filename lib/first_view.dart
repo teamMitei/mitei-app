@@ -14,10 +14,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 // マップの登録位置群を取得-------------------------------------------------------------
-void getMaps() async {
+Future<String> getMaps() async {
   final response =
       await http.get(Uri.parse('https://hack-u-mitei.herokuapp.com/maps'));
   print(response.body);
+  return Future<String>.value(response.body);
 }
 
 // マップ位置の登録　(経度，緯度，スタンプランク)
@@ -67,11 +68,53 @@ class Const {
   static const routeFirstView = '/first';
 }
 
+class Item {
+  Item(this.lat, this.lon);
+  //Item(this.lat, this.lon, this.stamp, this.daydata);
+
+  final double lat;
+  final double lon;
+  //final int stamp;
+  //final int daydata;
+}
+
+List<Item> data = <Item>[
+  Item(35, 135),
+  Item(36, 136),
+];
+
+late Future<String> locationList;
+var latitudeList = [];
+var longitudeList = [];
+int idLocationCount = 0;
+
+final List startSetMaps = [];
 //
 @override
 void initState() {
   //アプリ起動時に一度だけ実行される
-  getMaps();
+  locationList = getMaps();
+
+  locationList.then((value) {
+    latitudeList = [];
+    longitudeList = [];
+    idLocationCount = 0;
+    try {
+      while (true) {
+        latitudeList
+            .add(jsonDecode(value)['data'][idLocationCount]['latitude']);
+        longitudeList
+            .add(jsonDecode(value)['data'][idLocationCount]['longitude']);
+        idLocationCount += 1;
+      }
+    } catch (e) {
+      print(idLocationCount);
+    }
+  });
+
+  for (int i = 0; i <= idLocationCount; i++) {
+    data.add(Item(latitudeList[i], longitudeList[i]));
+  }
 }
 
 class FirstView extends StatelessWidget {
@@ -916,21 +959,6 @@ class _MyHomePageState extends State<MyHomePage>
 //   child: const Text('Launch the map'),
 // ),
 
-class Item {
-  Item(this.lat, this.lon);
-  //Item(this.lat, this.lon, this.stamp, this.daydata);
-
-  final double lat;
-  final double lon;
-  //final int stamp;
-  //final int daydata;
-}
-
-List<Item> data = <Item>[
-  Item(35, 135),
-  Item(36, 136),
-];
-
 class MyMap extends StatefulWidget {
   MyMap({Key? key, this.title}) : super(key: key);
   final String? title;
@@ -964,6 +992,15 @@ class _MyMap extends State<MyMap> {
 
   @override
   Widget build(BuildContext context) {
+    for (int i = 0; i < idLocationCount; i++) {
+      setState(() {
+        //myMarker = [];
+        _myMarker.add(Marker(
+          markerId: MarkerId(i.toString()),
+          position: LatLng(latitudeList[i], longitudeList[i]),
+        ));
+      });
+    }
     return Scaffold(
       body: GoogleMap(
         // マップとマーカー表示
