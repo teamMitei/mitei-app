@@ -889,14 +889,14 @@ class _MyHomePageState extends State<MyHomePage>
           ],
         )
       ],
-      body: _MapView(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // ここにボタンを押した時に呼ばれるコードを書く
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
+      body: MyMap(),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // ここにボタンを押した時に呼ばれるコードを書く
+      //   },
+      //   tooltip: 'Increment',
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 
@@ -916,7 +916,38 @@ class _MyHomePageState extends State<MyHomePage>
 //   child: const Text('Launch the map'),
 // ),
 
-class _MapView extends HookWidget {
+class Item {
+  Item(this.lat, this.lon);
+  //Item(this.lat, this.lon, this.stamp, this.daydata);
+
+  final double lat;
+  final double lon;
+  //final int stamp;
+  //final int daydata;
+}
+
+List<Item> data = <Item>[
+  Item(35, 135),
+  Item(36, 136),
+];
+
+class MyMap extends StatefulWidget {
+  MyMap({Key? key, this.title}) : super(key: key);
+  final String? title;
+  @override
+  _MyMap createState() => _MyMap();
+}
+
+class _MyMap extends State<MyMap> {
+  /* Latitude & Longitude */
+
+  /*Future<void> _goToTheLake() async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+  }*/
+
+  final List _myMarker = [];
+  /* Google Map */
   final Completer<GoogleMapController> _mapController = Completer();
   // 初期表示位置を渋谷駅に設定
   final Position _initialPosition = Position(
@@ -933,89 +964,84 @@ class _MapView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 初期表示座標のMarkerを設定
-    final initialMarkers = {
-      _initialPosition.timestamp.toString(): Marker(
-        markerId: MarkerId(_initialPosition.timestamp.toString()),
-        position: LatLng(_initialPosition.latitude, _initialPosition.longitude),
-      ),
-    };
-    final position = useState<Position>(_initialPosition);
-    final markers = useState<Map<String, Marker>>(initialMarkers);
-
-    _setCurrentLocation(position, markers);
-    _animateCamera(position);
-
     return Scaffold(
       body: GoogleMap(
-        mapType: MapType.normal,
-        myLocationButtonEnabled: false,
-        // 初期表示位置は渋谷駅に設定
+        // マップとマーカー表示
+        onMapCreated: _mapController.complete,
+        markers: Set.from(_myMarker),
+        //onTap: _hand,
+        // 初期位置
         initialCameraPosition: CameraPosition(
           target: LatLng(_initialPosition.latitude, _initialPosition.longitude),
-          zoom: 14.4746,
+          zoom: 17.0,
         ),
-        onMapCreated: _mapController.complete,
-        markers: _createMarker(position),
+        // 地図タイプ
+        mapType: MapType.normal,
+        // 現在地マーク
+        myLocationEnabled: true,
       ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Theme.of(context).accentColor,
+        onPressed: () {
+          _getLocation();
+        },
+        child: Icon(Icons.add),
+      ),
+      // bottomNavigationBar: SizedBox(
+      //   height: 40,
+      //   child: BottomAppBar(
+      //     color: Theme.of(context).primaryColor,
+      //     notchMargin: 6.0,
+      //     shape: AutomaticNotchedShape(
+      //       RoundedRectangleBorder(),
+      //       StadiumBorder(
+      //         side: BorderSide(),
+      //       ),
+      //     ),
+      //     child: Padding(
+      //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      //       child: new Row(
+      //         mainAxisSize: MainAxisSize.max,
+      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //         children: <Widget>[
+      //           IconButton(
+      //             icon: Icon(
+      //               Icons.person_outline,
+      //               color: Colors.white,
+      //             ),
+      //             onPressed: () {},
+      //           ),
+      //           IconButton(
+      //             icon: Icon(
+      //               Icons.info_outline,
+      //               color: Colors.white,
+      //             ),
+      //             onPressed: () {},
+      //           ),
+      //         ],
+      //       ),
+      //     ),
+      //   ),
+      // ),
     );
   }
-  static final LatLng _kMapCenter1 = LatLng(34.652499, 135.506306);
-  static final LatLng _kMapCenter2 = LatLng(34.64000, 135.49000);
 
-  Set<Marker> _createMarker(ValueNotifier<Position> position) {
-    return {
-      Marker(
-          markerId: MarkerId("marker_1"),
-          position: _kMapCenter1,
-      ),
-      Marker(
-        markerId: MarkerId("marker_3"),
-        position: LatLng(position.value.latitude-0.01, position.value.longitude),
-      ),
-      Marker(
-        markerId: MarkerId("marker_2"),
-        position: LatLng(position.value.latitude, position.value.longitude),
-      ),
-    };
-  }
-
-
-  Future<void> _setCurrentLocation(ValueNotifier<Position> position,
-      ValueNotifier<Map<String, Marker>> markers) async {
-    final currentPosition = await Geolocator.getCurrentPosition(
+  _getLocation() async {
+    final cPosition = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
-
-    const decimalPoint = 3;
-    // 過去の座標と最新の座標の小数点第三位で切り捨てた値を判定
-    if ((position.value.latitude).toStringAsFixed(decimalPoint) !=
-            (currentPosition.latitude).toStringAsFixed(decimalPoint) &&
-        (position.value.longitude).toStringAsFixed(decimalPoint) !=
-            (currentPosition.longitude).toStringAsFixed(decimalPoint)) {
-      // 現在地座標にMarkerを立てる
-      final marker = Marker(
-          markerId: MarkerId(currentPosition.timestamp.toString()),
-          position: LatLng(currentPosition.latitude, currentPosition.longitude),
-          //追記----------------------------------------------------------------------
-          onTap: () {}
-          //--------------------------------------------------------------------------
-          );
-      markers.value.clear();
-      markers.value[currentPosition.timestamp.toString()] = marker;
-      // 現在地座標のstateを更新する
-      position.value = currentPosition;
-    }
-  }
-
-  Future<void> _animateCamera(ValueNotifier<Position> position) async {
-    final mapController = await _mapController.future;
-    // 現在地座標が取得できたらカメラを現在地に移動する
-    await mapController.animateCamera(
-      CameraUpdate.newLatLng(
-        LatLng(position.value.latitude, position.value.longitude),
-      ),
-    );
+    print(LatLng(cPosition.latitude, cPosition.longitude));
+    print(data);
+    data.add(Item(cPosition.latitude, cPosition.longitude));
+    setState(() {
+      //myMarker = [];
+      _myMarker.add(Marker(
+        markerId: MarkerId(cPosition.toString()),
+        position: LatLng(cPosition.latitude, cPosition.longitude),
+      ));
+    });
   }
 }
 
